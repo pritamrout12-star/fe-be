@@ -13,7 +13,7 @@ jobs:
       - name: 🚀 Deploy to Frontend EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: 3.88.204.118
+          host: 54.82.173.137
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
