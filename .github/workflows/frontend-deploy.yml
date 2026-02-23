@@ -18,7 +18,6 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
-            set -e
             echo "🚀 Starting frontend deploy..."
 
             cd /home/ubuntu/fe-be
