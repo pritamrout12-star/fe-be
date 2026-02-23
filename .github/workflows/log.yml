@@ -1,0 +1,56 @@
+name: Deploy Frontend to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🚀 Deploy to Frontend EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 3.88.204.118
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            LOG_FILE=/home/ubuntu/deploy.log
+
+            {
+              echo "===================================="
+              echo "🚀 DEPLOY STARTED"
+              echo "Time: $(date)"
+              echo "Server: $(hostname)"
+              echo "===================================="
+
+              cd /home/ubuntu/fe-be
+
+              echo "🔎 Git status:"
+              git status
+
+              echo "⬇️ Pulling latest code..."
+              git pull origin main
+
+              echo "📝 Recent commits:"
+              git --no-pager log -n 3 --oneline
+
+              echo "📦 Installing dependencies..."
+              npm install
+
+              echo "🏗️ Building frontend..."
+              npm run build
+
+              echo "🔄 Restarting PM2..."
+              pm2 restart all || true
+
+              echo "📊 PM2 status:"
+              pm2 list
+
+              echo "✅ DEPLOY FINISHED"
+              echo "Time: $(date)"
+              echo "===================================="
+              echo ""
