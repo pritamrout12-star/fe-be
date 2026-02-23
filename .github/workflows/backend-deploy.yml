@@ -1,0 +1,54 @@
+name: Deploy Backend to EC2
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'   # 🔥 only triggers when backend changes
+      - '.github/workflows/backend-deploy.yml'
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🚀 Deploy Backend via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 98.94.10.229 
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            LOG_FILE=/home/ubuntu/backend-deploy.log
+
+            {
+              echo "===================================="
+              echo "🚀 BACKEND DEPLOY STARTED"
+              echo "Time: $(date)"
+              echo "Server: $(hostname)"
+              echo "===================================="
+
+              cd /home/ubuntu/fe-be
+
+              echo "⬇️ Pulling latest code..."
+              git pull origin main
+
+              echo "📝 Recent commits:"
+              git --no-pager log -n 3 --oneline
+
+              echo "📦 Installing backend dependencies..."
+              npm install
+
+              echo "🔄 Restarting backend (PM2)..."
+              pm2 restart all || true
+
+              echo "📊 PM2 status:"
+              pm2 list
+
+              echo "✅ BACKEND DEPLOY FINISHED"
+              echo "Time: $(date)"
+              echo "===================================="
+              echo ""
+            } >> $LOG_FILE 2>&1
